@@ -3,12 +3,17 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
-import { Menu, X, Zap, ChevronDown, User, Plus, LayoutGrid, LogOut } from "lucide-react";
+import { Menu, X, Zap, ChevronDown, Plus, LayoutGrid, LogOut } from "lucide-react";
 
 const navLinks = [
   { href: "/", label: "Home" },
   { href: "/items", label: "Products" },
   { href: "/about", label: "About" },
+];
+
+const dropLinks = [
+  { href: "/items/add", icon: <Plus size={15} />, label: "Add Product" },
+  { href: "/items/manage", icon: <LayoutGrid size={15} />, label: "Manage Products" },
 ];
 
 export default function Navbar() {
@@ -20,175 +25,223 @@ export default function Navbar() {
   const dropRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    function handleClick(e: MouseEvent) {
+    function handleClickOutside(e: MouseEvent) {
       if (dropRef.current && !dropRef.current.contains(e.target as Node)) {
         setDropOpen(false);
       }
     }
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const handleLogout = async () => {
     await logout();
     setDropOpen(false);
+    setMenuOpen(false);
     router.push("/");
   };
 
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname.startsWith(href);
 
+  const navLinkClass = (href: string) =>
+    isActive(href)
+      ? "px-4 py-2 rounded-lg text-sm font-medium text-amber-400 bg-amber-400/10 transition-all duration-200"
+      : "px-4 py-2 rounded-lg text-sm font-medium text-[#7a7a9a] hover:text-[#e8e8f0] hover:bg-[#16162a] transition-all duration-200";
+
+  const mobileLinkClass = (href: string) =>
+    isActive(href)
+      ? "block px-4 py-3 rounded-lg font-medium text-amber-400 bg-amber-400/10 mb-1 no-underline transition-all duration-200"
+      : "block px-4 py-3 rounded-lg font-medium text-[#e8e8f0] hover:bg-[#16162a] mb-1 no-underline transition-all duration-200";
+
   return (
-    <nav className="navbar">
-      <div className="container" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", height: "68px" }}>
+    <nav className="sticky top-0 z-50 bg-[#07070d]/85 backdrop-blur-xl border-b border-[#1e1e35]">
+      <div className="max-w-[1200px] mx-auto px-6 flex items-center justify-between h-[68px]">
+
         {/* Logo */}
-        <Link href="/" style={{ display: "flex", alignItems: "center", gap: "10px", textDecoration: "none" }}>
-          <div style={{
-            width: "34px", height: "34px", borderRadius: "8px",
-            background: "var(--accent)", display: "flex", alignItems: "center", justifyContent: "center"
-          }}>
+        <Link href="/" className="flex items-center gap-2.5 no-underline">
+          <div className="w-[34px] h-[34px] rounded-lg bg-amber-400 flex items-center justify-center shrink-0">
             <Zap size={18} color="#07070d" strokeWidth={2.5} />
           </div>
-          <span style={{ fontFamily: "'Playfair Display', serif", fontSize: "1.3rem", fontWeight: 700, color: "var(--text)" }}>
+          <span className="font-serif text-[1.3rem] font-bold text-[#e8e8f0]">
             Nexus
           </span>
         </Link>
 
-        {/* Desktop Nav */}
-        <div className="hidden md:flex justify-center items-center gap-4">
+        {/* Desktop nav links */}
+        <div className="hidden md:flex items-center gap-1">
           {navLinks.map(({ href, label }) => (
-            <Link key={href} href={href} style={{
-              padding: "8px 16px", borderRadius: "8px", fontSize: "0.9rem", fontWeight: 500,
-              color: isActive(href) ? "var(--accent)" : "var(--text-muted)",
-              background: isActive(href) ? "var(--accent-glow)" : "transparent",
-              textDecoration: "none", transition: "all 0.2s ease",
-            }}
-              onMouseEnter={e => { if (!isActive(href)) (e.target as HTMLElement).style.color = "var(--text)"; }}
-              onMouseLeave={e => { if (!isActive(href)) (e.target as HTMLElement).style.color = "var(--text-muted)"; }}
-            >{label}</Link>
+            <Link key={href} href={href} className={navLinkClass(href)}>
+              {label}
+            </Link>
           ))}
         </div>
 
         {/* Right side */}
-        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+        <div className="flex items-center gap-3">
+
+          {/* Logged-in user dropdown */}
           {user ? (
-            <div ref={dropRef} style={{ position: "relative" }} className="hidden md:block">
-              <button onClick={() => setDropOpen(!dropOpen)} style={{
-                display: "flex", alignItems: "center", gap: "10px",
-                background: "var(--surface-2)", border: "1px solid var(--border)",
-                borderRadius: "40px", padding: "6px 16px 6px 8px", cursor: "pointer",
-                color: "var(--text)", transition: "all 0.2s ease",
-              }}>
-                <div style={{
-                  width: "28px", height: "28px", borderRadius: "50%",
-                  background: "var(--accent)", display: "flex", alignItems: "center",
-                  justifyContent: "center", flexShrink: 0,
-                }}>
-                  <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "#07070d" }}>
-                    {user.displayName?.[0]?.toUpperCase() || user.email?.[0]?.toUpperCase() || "U"}
+            <div ref={dropRef} className="relative hidden md:block">
+              <button
+                onClick={() => setDropOpen(!dropOpen)}
+                className="flex items-center gap-2.5 bg-[#16162a] border border-[#1e1e35] rounded-full pl-2 pr-4 py-1.5 cursor-pointer text-[#e8e8f0] hover:border-[#2a2a45] transition-all duration-200"
+              >
+                {/* Avatar */}
+                <div className="w-7 h-7 rounded-full bg-amber-400 flex items-center justify-center shrink-0">
+                  <span className="text-xs font-bold text-[#07070d]">
+                    {user.displayName?.[0]?.toUpperCase() ||
+                      user.email?.[0]?.toUpperCase() ||
+                      "U"}
                   </span>
                 </div>
-                <span style={{ fontSize: "0.85rem", fontWeight: 500, maxWidth: "120px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                {/* Display name */}
+                <span className="text-sm font-medium max-w-[120px] overflow-hidden text-ellipsis whitespace-nowrap">
                   {user.displayName || user.email?.split("@")[0]}
                 </span>
-                <ChevronDown size={14} color="var(--text-muted)" style={{ transition: "transform 0.2s", transform: dropOpen ? "rotate(180deg)" : "none" }} />
+                <ChevronDown
+                  size={14}
+                  className={`text-[#7a7a9a] transition-transform duration-200 ${dropOpen ? "rotate-180" : ""}`}
+                />
               </button>
+
+              {/* Dropdown panel */}
               {dropOpen && (
-                <div style={{
-                  position: "absolute", right: 0, top: "calc(100% + 8px)",
-                  background: "var(--surface)", border: "1px solid var(--border)",
-                  borderRadius: "var(--radius)", minWidth: "220px",
-                  padding: "8px", boxShadow: "0 16px 48px rgba(0,0,0,0.5)",
-                  animation: "fadeIn 0.15s ease",
-                }}>
-                  <div style={{ padding: "10px 12px 14px", borderBottom: "1px solid var(--border)", marginBottom: "6px" }}>
-                    <div style={{ fontSize: "0.75rem", color: "var(--text-muted)", marginBottom: "2px" }}>Signed in as</div>
-                    <div style={{ fontSize: "0.875rem", fontWeight: 600, color: "var(--text)", overflow: "hidden", textOverflow: "ellipsis" }}>{user.email}</div>
+                <div className="absolute right-0 top-[calc(100%+8px)] bg-[#0f0f1a] border border-[#1e1e35] rounded-xl min-w-[220px] p-2 shadow-[0_16px_48px_rgba(0,0,0,0.5)] animate-in fade-in slide-in-from-top-2 duration-150">
+                  {/* User info */}
+                  <div className="px-3 py-2.5 border-b border-[#1e1e35] mb-1.5">
+                    <p className="text-xs text-[#7a7a9a] mb-0.5">Signed in as</p>
+                    <p className="text-sm font-semibold text-[#e8e8f0] overflow-hidden text-ellipsis">
+                      {user.email}
+                    </p>
                   </div>
-                  {[
-                    { href: "/items/add", icon: <Plus size={15} />, label: "Add Product" },
-                    { href: "/items/manage", icon: <LayoutGrid size={15} />, label: "Manage Products" },
-                  ].map(item => (
-                    <Link key={item.href} href={item.href} onClick={() => setDropOpen(false)} style={{
-                      display: "flex", alignItems: "center", gap: "10px",
-                      padding: "9px 12px", borderRadius: "var(--radius-sm)",
-                      color: "var(--text-muted)", fontSize: "0.875rem", textDecoration: "none",
-                      transition: "all 0.15s ease",
-                    }}
-                      onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "var(--surface-2)"; (e.currentTarget as HTMLElement).style.color = "var(--text)"; }}
-                      onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "transparent"; (e.currentTarget as HTMLElement).style.color = "var(--text-muted)"; }}
+
+                  {/* Drop links */}
+                  {dropLinks.map((item) => (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => setDropOpen(false)}
+                      className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-[#7a7a9a] hover:text-[#e8e8f0] hover:bg-[#16162a] no-underline transition-all duration-150"
                     >
-                      {item.icon}{item.label}
+                      {item.icon}
+                      {item.label}
                     </Link>
                   ))}
-                  <div style={{ height: "1px", background: "var(--border)", margin: "6px 0" }} />
-                  <button onClick={handleLogout} style={{
-                    display: "flex", alignItems: "center", gap: "10px", width: "100%",
-                    padding: "9px 12px", borderRadius: "var(--radius-sm)",
-                    color: "var(--danger)", fontSize: "0.875rem",
-                    background: "transparent", border: "none", cursor: "pointer", transition: "all 0.15s ease",
-                  }}
-                    onMouseEnter={e => (e.currentTarget.style.background = "rgba(224,85,85,0.08)")}
-                    onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+
+                  <div className="h-px bg-[#1e1e35] my-1.5" />
+
+                  {/* Sign out */}
+                  <button
+                    onClick={handleLogout}
+                    className="flex items-center gap-2.5 w-full px-3 py-2 rounded-lg text-sm text-[#e05555] hover:bg-[#e05555]/10 bg-transparent border-none cursor-pointer transition-all duration-150"
                   >
-                    <LogOut size={15} />Sign out
+                    <LogOut size={15} />
+                    Sign out
                   </button>
                 </div>
               )}
             </div>
           ) : (
-            <div className="hidden md:flex items-center justify-center gap-4">
-              <Link href="/login" className="btn-ghost">Sign in</Link>
-              <Link href="/register" className="btn-primary" style={{ padding: "9px 20px", fontSize: "0.85rem" }}>Get Started</Link>
+            /* Guest auth buttons */
+            <div className="hidden md:flex items-center gap-2">
+              <Link
+                href="/login"
+                className="px-4 py-2 rounded-lg text-sm font-medium text-[#7a7a9a] hover:text-[#e8e8f0] hover:bg-[#16162a] transition-all duration-200 no-underline"
+              >
+                Sign in
+              </Link>
+              <Link
+                href="/register"
+                className="px-5 py-2 rounded-lg text-sm font-semibold bg-amber-400 text-[#07070d] hover:bg-amber-300 hover:shadow-[0_8px_24px_rgba(240,165,0,0.3)] transition-all duration-200 no-underline"
+              >
+                Get Started
+              </Link>
             </div>
           )}
 
-          {/* Mobile burger */}
-          <button onClick={() => setMenuOpen(!menuOpen)} style={{
-            background: "var(--surface-2)", border: "1px solid var(--border)",
-            borderRadius: "8px", padding: "8px", cursor: "pointer", color: "var(--text)",
-            display: "flex", alignItems: "center",
-          }} className="flex md:hidden">
+          {/* Mobile hamburger */}
+          <button
+            onClick={() => setMenuOpen(!menuOpen)}
+            className="md:hidden flex items-center justify-center w-10 h-10 rounded-lg bg-[#16162a] border border-[#1e1e35] text-[#e8e8f0] cursor-pointer hover:border-[#2a2a45] transition-all duration-200"
+          >
             {menuOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
         </div>
       </div>
 
-      {/* Mobile Menu */}
+      {/* Mobile menu */}
       {menuOpen && (
-        <div style={{
-          borderTop: "1px solid var(--border)",
-          background: "var(--surface)",
-          padding: "16px",
-          animation: "fadeUp 0.2s ease",
-        }} className="md:hidden">
+        <div className="md:hidden border-t border-[#1e1e35] bg-[#0f0f1a] px-4 py-4">
+          {/* Nav links */}
           {navLinks.map(({ href, label }) => (
-            <Link key={href} href={href} onClick={() => setMenuOpen(false)} style={{
-              display: "block", padding: "12px 16px", borderRadius: "8px",
-              color: isActive(href) ? "var(--accent)" : "var(--text)",
-              background: isActive(href) ? "var(--accent-glow)" : "transparent",
-              textDecoration: "none", fontWeight: 500, marginBottom: "4px",
-            }}>{label}</Link>
+            <Link
+              key={href}
+              href={href}
+              onClick={() => setMenuOpen(false)}
+              className={mobileLinkClass(href)}
+            >
+              {label}
+            </Link>
           ))}
-          <div style={{ height: "1px", background: "var(--border)", margin: "12px 0" }} />
+
+          <div className="h-px bg-[#1e1e35] my-3" />
+
           {user ? (
             <>
-              <Link href="/items/add" onClick={() => setMenuOpen(false)} style={{ display: "block", padding: "12px 16px", color: "var(--text)", textDecoration: "none", fontWeight: 500, borderRadius: "8px" }}>
-                Add Product
-              </Link>
-              <Link href="/items/manage" onClick={() => setMenuOpen(false)} style={{ display: "block", padding: "12px 16px", color: "var(--text)", textDecoration: "none", fontWeight: 500, borderRadius: "8px" }}>
-                Manage Products
-              </Link>
-              <button onClick={() => { handleLogout(); setMenuOpen(false); }} style={{
-                display: "block", width: "100%", textAlign: "left", padding: "12px 16px",
-                color: "var(--danger)", fontWeight: 500, background: "none", border: "none",
-                cursor: "pointer", borderRadius: "8px", fontSize: "1rem",
-              }}>Sign out</button>
+              {/* Logged-in user info */}
+              <div className="flex items-center gap-3 px-4 py-3 mb-2">
+                <div className="w-8 h-8 rounded-full bg-amber-400 flex items-center justify-center shrink-0">
+                  <span className="text-xs font-bold text-[#07070d]">
+                    {user.displayName?.[0]?.toUpperCase() ||
+                      user.email?.[0]?.toUpperCase() ||
+                      "U"}
+                  </span>
+                </div>
+                <div className="overflow-hidden">
+                  <p className="text-sm font-semibold text-[#e8e8f0] leading-tight truncate">
+                    {user.displayName || user.email?.split("@")[0]}
+                  </p>
+                  <p className="text-xs text-[#7a7a9a] truncate">{user.email}</p>
+                </div>
+              </div>
+
+              {dropLinks.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center gap-2.5 px-4 py-3 rounded-lg text-sm font-medium text-[#e8e8f0] hover:bg-[#16162a] no-underline mb-1 transition-all duration-150"
+                >
+                  {item.icon}
+                  {item.label}
+                </Link>
+              ))}
+
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-2.5 w-full px-4 py-3 rounded-lg text-sm font-medium text-[#e05555] hover:bg-[#e05555]/10 bg-transparent border-none cursor-pointer transition-all duration-150"
+              >
+                <LogOut size={15} />
+                Sign out
+              </button>
             </>
           ) : (
-            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-              <Link href="/login" onClick={() => setMenuOpen(false)} className="btn-secondary" style={{ textAlign: "center", justifyContent: "center" }}>Sign in</Link>
-              <Link href="/register" onClick={() => setMenuOpen(false)} className="btn-primary" style={{ textAlign: "center", justifyContent: "center" }}>Get Started</Link>
+            <div className="flex flex-col gap-2 pt-1">
+              <Link
+                href="/login"
+                onClick={() => setMenuOpen(false)}
+                className="flex items-center justify-center px-4 py-3 rounded-lg text-sm font-medium text-[#e8e8f0] border border-[#2a2a45] hover:border-amber-400 hover:text-amber-400 no-underline transition-all duration-200"
+              >
+                Sign in
+              </Link>
+              <Link
+                href="/register"
+                onClick={() => setMenuOpen(false)}
+                className="flex items-center justify-center px-4 py-3 rounded-lg text-sm font-semibold bg-amber-400 text-[#07070d] hover:bg-amber-300 no-underline transition-all duration-200"
+              >
+                Get Started
+              </Link>
             </div>
           )}
         </div>
