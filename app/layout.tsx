@@ -1,32 +1,19 @@
 import type { Metadata } from "next";
-import { Playfair_Display } from "next/font/google";
 import "./globals.css";
-import { AuthProvider } from "./contexts/AuthContext";
-import Navbar from "./components/Navbar";
-import Footer from "./components/Footer";
+import { AuthProvider } from "@/contexts/AuthContext";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 import { Toaster } from "react-hot-toast";
 
-const playfair = Playfair_Display({
-  subsets: ["latin"],
-  variable: "--font-playfair",
-});
-
 export const metadata: Metadata = {
-  title: "Nexus | Premium Tech Marketplace",
-  description:
-    "Discover cutting-edge technology products curated for professionals and enthusiasts.",
+  title: "Nexus — Premium Tech Marketplace",
+  description: "Discover cutting-edge technology products curated for professionals and enthusiasts.",
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={playfair.variable}>
-      <body
-        style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}
-      >
+    <html lang="en">
+      <body style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
         <AuthProvider>
           <Navbar />
           <main style={{ flex: 1 }}>{children}</main>
@@ -41,15 +28,8 @@ export default function RootLayout({
                 fontFamily: "'DM Sans', sans-serif",
                 fontSize: "0.875rem",
               },
-              success: {
-                iconTheme: {
-                  primary: "var(--success)",
-                  secondary: "var(--bg)",
-                },
-              },
-              error: {
-                iconTheme: { primary: "var(--danger)", secondary: "var(--bg)" },
-              },
+              success: { iconTheme: { primary: "var(--success)", secondary: "var(--bg)" } },
+              error: { iconTheme: { primary: "var(--danger)", secondary: "var(--bg)" } },
             }}
           />
         </AuthProvider>

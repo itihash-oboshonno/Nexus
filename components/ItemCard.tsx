@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Star, ArrowRight, Tag } from "lucide-react";
-import { Item } from "../data/items";
+import { Item } from "@/data/items";
 
 function StarRating({ rating }: { rating: number }) {
   return (

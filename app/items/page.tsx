@@ -1,8 +1,8 @@
 "use client";
 import { useState, useEffect, useMemo } from "react";
 import { Search, SlidersHorizontal, X } from "lucide-react";
-import { getStoredItems, CATEGORIES, Item } from "../../data/items";
-import ItemCard from "@/app/components/ItemCard";
+import { getStoredItems, CATEGORIES, Item } from "@/data/items";
+import ItemCard from "@/components/ItemCard";
 
 const PRICE_RANGES = [
   { label: "All Prices", min: 0, max: Infinity },

@@ -2,7 +2,7 @@
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useAuth } from "../contexts/AuthContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { Menu, X, Zap, ChevronDown, User, Plus, LayoutGrid, LogOut } from "lucide-react";
 
 const navLinks = [
@@ -55,7 +55,7 @@ export default function Navbar() {
         </Link>
 
         {/* Desktop Nav */}
-        <div style={{ display: "flex", alignItems: "center", gap: "4px" }} className="hidden md:flex">
+        <div className="hidden md:flex justify-center items-center gap-4">
           {navLinks.map(({ href, label }) => (
             <Link key={href} href={href} style={{
               padding: "8px 16px", borderRadius: "8px", fontSize: "0.9rem", fontWeight: 500,
@@ -137,7 +137,7 @@ export default function Navbar() {
               )}
             </div>
           ) : (
-            <div style={{ display: "flex", gap: "8px" }} className="hidden md:flex">
+            <div className="hidden md:flex items-center justify-center gap-4">
               <Link href="/login" className="btn-ghost">Sign in</Link>
               <Link href="/register" className="btn-primary" style={{ padding: "9px 20px", fontSize: "0.85rem" }}>Get Started</Link>
             </div>
@@ -148,7 +148,7 @@ export default function Navbar() {
             background: "var(--surface-2)", border: "1px solid var(--border)",
             borderRadius: "8px", padding: "8px", cursor: "pointer", color: "var(--text)",
             display: "flex", alignItems: "center",
-          }} className="md:hidden">
+          }} className="flex md:hidden">
             {menuOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
         </div>

@@ -2,9 +2,8 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Eye, EyeOff, Zap, Mail, Lock } from "lucide-react";
-import { FaChrome } from "react-icons/fa";
-import { useAuth } from "../../contexts/AuthContext";
+import { Eye, EyeOff, Zap, Mail, Lock, Globe } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 import toast from "react-hot-toast";
 
 export default function LoginPage() {
@@ -20,7 +19,7 @@ export default function LoginPage() {
     if (user) router.replace("/");
   }, [user, router]);
 
-  const handleSubmit = async (e: React.SubmitEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) { toast.error("Please fill all fields"); return; }
     setLoading(true);
@@ -77,7 +76,7 @@ export default function LoginPage() {
           }}
             onMouseEnter={e => (e.currentTarget.style.borderColor = "var(--border-light)")}
             onMouseLeave={e => (e.currentTarget.style.borderColor = "var(--border)")}>
-            <FaChrome size={18} color="#4285f4" />
+            <Globe size={18} color="#4285f4" />
             {gLoading ? "Signing in..." : "Continue with Google"}
           </button>
 

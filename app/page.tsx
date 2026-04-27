@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { ArrowRight, Cpu, Shield, Truck, Headphones, Star, Quote, Zap, ChevronRight, Package, TrendingUp, Award } from "lucide-react";
-import { staticItems } from "./data/items";
+import { staticItems } from "@/data/items";
 
 const features = [
   { icon: <Cpu size={22} />, title: "Cutting-Edge Tech", desc: "We source only the most innovative products from the world's leading technology brands." },
