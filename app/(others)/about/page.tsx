@@ -1,3 +1,4 @@
+"use client"
 import Link from "next/link";
 import { Zap, Target, Heart, Globe, ArrowRight } from "lucide-react";
 
